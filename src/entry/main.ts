@@ -1,0 +1,29 @@
+import * as stepTracer from "../features/step/tracer";
+import * as statCollector from "../features/stats/statsCollectorManager";
+import * as processTracer from "../features/process/processTracerManager";
+import { Logger } from "../utils/logger";
+import { loadMainConfig } from "../config/loader";
+import {validateSubscription} from "./subscription";
+
+const logger = new Logger();
+
+
+async function run(): Promise<void> {
+  try {
+    await validateSubscription();
+    logger.info(`Initializing ...`);
+
+    const config = loadMainConfig();
+
+    // Start tracers and collectors
+    await stepTracer.start();
+    await statCollector.start(config.statsCollector);
+    await processTracer.start(config.processTracer);
+
+    logger.info(`Initialization completed`);
+  } catch (error: unknown) {
+    logger.error(error);
+  }
+}
+
+run();
